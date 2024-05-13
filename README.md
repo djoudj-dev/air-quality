@@ -4,7 +4,7 @@ Cette application permet de consulter la qualité de l'air dans différentes vil
 
 ## Capture d'écran
 
-ressources/AppAirQuality.jpg
+![Capture d'écran de l'application](ressources/AppAirQuality.jpg)
 
 ## Fonctionnalités
 
