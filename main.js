@@ -43,7 +43,7 @@ const pollutionScale = [
 
   async function getPollutionData() {
     try {
-        const response = await fetch("http://api.airvisual.com/v2/nearest_city?key=60df5a43-9827-4477-af7f-7de59da5d177").catch
+        const response = await fetch("https://api.airvisual.com/v2/nearest_city?key=60df5a43-9827-4477-af7f-7de59da5d177").catch
         (error => {
             throw new Error(error);
         })
