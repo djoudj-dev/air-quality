@@ -12,4 +12,4 @@ Cette application permet de consulter la qualité de l'air dans différentes vil
 
 ## Visualisation
 
-[Lien.](https://juliennedellec.github.io/air-quality/)
+[Lien.](https://djoudj-dev.github.io/air-quality/)
