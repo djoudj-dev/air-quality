@@ -112,9 +112,6 @@ const locationPointer = document.querySelector(".location-pointer");
 
 function pointerPlacement(AQIUSValue) {
   const parentWidth = locationPointer.parentElement.scrollWidth;
-  console.log(parentWidth);
-  console.log(AQIUSValue);
-  console.log(AQIUSValue / 500);
   locationPointer.style.transform = `translateX(${
     (AQIUSValue / 500) * parentWidth
   }px) rotate(180deg)`;
