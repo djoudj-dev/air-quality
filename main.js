@@ -44,23 +44,29 @@ const userInformation = document.querySelector(".user-information");
 async function getPollutionData(city = null) {
   const baseUrl = "https://api.airvisual.com/v2/";
   const endpoint = city
-    ? `city?city=${city}&key=	
-60df5a43-9827-4477-af7f-7de59da5d177`
-    : "nearest_city?key=	
-60df5a43-9827-4477-af7f-7de59da5d177";
+    ? `city?city=${encodeURIComponent(
+        city
+      )}&country=FR&state=Ile-de-France&key=60df5a43-9827-4477-af7f-7de59da5d177`
+    : `nearest_city?key=60df5a43-9827-4477-af7f-7de59da5d177`;
 
   try {
     const response = await fetch(baseUrl + endpoint);
-    console.log(response);
+
+    console.log("URL appelée:", baseUrl + endpoint);
+    console.log("Statut de la réponse:", response.status);
+
     if (!response.ok) {
-      throw new Error(`Error: ${response.status}, ${response.statusText}`);
+      throw new Error(`Erreur ${response.status}: ${response.statusText}`);
     }
 
-    console.log(response);
-
     const responseData = await response.json();
+    console.log("Données reçues:", responseData);
+
+    if (!responseData.data) {
+      throw new Error("Données invalides reçues de l'API");
+    }
+
     const aqius = responseData.data.current.pollution.aqius;
-    console.log(responseData);
 
     const sortedData = {
       city: responseData.data.city,
@@ -71,8 +77,11 @@ async function getPollutionData(city = null) {
         (object) => aqius >= object.scale[0] && aqius <= object.scale[1]
       ),
     };
+
+    console.log("Données triées:", sortedData);
     populateUI(sortedData);
   } catch (error) {
+    console.error("Erreur détaillée:", error);
     handleError(error);
   }
 }
@@ -113,7 +122,7 @@ function pointerPlacement(AQIUSValue) {
 
 function handleError(error) {
   loader.classList.remove("active");
-  
+
   // Réinitialiser l'interface
   cityName.textContent = "---";
   pollutionInfo.textContent = "---";
@@ -121,8 +130,9 @@ function handleError(error) {
   temperature.textContent = "---";
   humidity.textContent = "---";
   emojiLogo.src = "ressources/error.svg";
-  backgroundLayer.style.background = "linear-gradient(45deg, #4ba0d9, #6dd5fa, #fff)";
-  
+  backgroundLayer.style.background =
+    "linear-gradient(45deg, #4ba0d9, #6dd5fa, #fff)";
+
   if (error.message.includes("Failed to fetch")) {
     userInformation.textContent = "Problème de connexion réseau";
   } else if (error.message.includes("404")) {
