@@ -44,8 +44,10 @@ const userInformation = document.querySelector(".user-information");
 async function getPollutionData(city = null) {
   const baseUrl = "https://api.airvisual.com/v2/";
   const endpoint = city
-    ? `city?city=${city}&key=VOTRE_CLE`
-    : "nearest_city?key=VOTRE_CLE";
+    ? `city?city=${city}&key=	
+60df5a43-9827-4477-af7f-7de59da5d177`
+    : "nearest_city?key=	
+60df5a43-9827-4477-af7f-7de59da5d177";
 
   try {
     const response = await fetch(baseUrl + endpoint);
@@ -63,6 +65,8 @@ async function getPollutionData(city = null) {
     const sortedData = {
       city: responseData.data.city,
       aqius,
+      temperature: responseData.data.current.weather.tp,
+      humidity: responseData.data.current.weather.hu,
       ...pollutionScale.find(
         (object) => aqius >= object.scale[0] && aqius <= object.scale[1]
       ),
@@ -79,6 +83,8 @@ const cityName = document.querySelector(".city-name");
 const pollutionInfo = document.querySelector(".pollution-info");
 const pollutionValue = document.querySelector(".pollution-value");
 const backgroundLayer = document.querySelector(".background-layer");
+const temperature = document.querySelector(".temperature");
+const humidity = document.querySelector(".humidity");
 
 function populateUI(data) {
   emojiLogo.src = `ressources/${data.src}.svg`;
@@ -86,6 +92,8 @@ function populateUI(data) {
   cityName.textContent = data.city;
   pollutionInfo.textContent = data.quality;
   pollutionValue.textContent = data.aqius;
+  temperature.textContent = `${data.temperature}°C`;
+  humidity.textContent = `${data.humidity}%`;
   backgroundLayer.style.background = data.background;
   loader.classList.remove("active");
   pointerPlacement(data.aqius);
@@ -104,21 +112,24 @@ function pointerPlacement(AQIUSValue) {
 }
 
 function handleError(error) {
-  const errorMessages = {
-    network: "Problème de connexion réseau",
-    api: "Erreur de l'API",
-    location: "Impossible de trouver la ville",
-    default: "Une erreur est survenue",
-  };
-
   loader.classList.remove("active");
-  userInformation.textContent = error.message || errorMessages.default;
-
+  
   // Réinitialiser l'interface
   cityName.textContent = "---";
   pollutionInfo.textContent = "---";
   pollutionValue.textContent = "---";
-  emojiLogo.src = "ressources/error.svg"; // Ajouter une icône d'erreur
+  temperature.textContent = "---";
+  humidity.textContent = "---";
+  emojiLogo.src = "ressources/error.svg";
+  backgroundLayer.style.background = "linear-gradient(45deg, #4ba0d9, #6dd5fa, #fff)";
+  
+  if (error.message.includes("Failed to fetch")) {
+    userInformation.textContent = "Problème de connexion réseau";
+  } else if (error.message.includes("404")) {
+    userInformation.textContent = "Ville non trouvée";
+  } else {
+    userInformation.textContent = "Une erreur est survenue";
+  }
 }
 
 const searchBtn = document.querySelector("#searchBtn");
