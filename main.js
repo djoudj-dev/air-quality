@@ -1,31 +1,31 @@
 const pollutionScale = [
   {
     scale: [0, 50],
-    quality: "Good",
+    quality: "Bonne",
     src: "happy",
     background: "linear-gradient(to right, #45B649, #DCE35B)",
   },
   {
     scale: [51, 100],
-    quality: "Moderate",
+    quality: "Modérée",
     src: "thinking",
     background: "linear-gradient(to right, #F3F9A7, #CAC531)",
   },
   {
     scale: [101, 150],
-    quality: "Unhealthy",
+    quality: "Mauvaise pour la santé",
     src: "unhealthy",
     background: "linear-gradient(to right, #F16529, #E44D26)",
   },
   {
     scale: [151, 200],
-    quality: "Bad",
+    quality: "Mauvaise",
     src: "bad",
     background: "linear-gradient(to right, #ef473a, #cb2d3e)",
   },
   {
     scale: [201, 300],
-    quality: "Very bad",
+    quality: "Très mauvaise",
     src: "mask",
     background: "linear-gradient(to right, #8E54E9, #4776E6)",
   },
@@ -104,11 +104,41 @@ function pointerPlacement(AQIUSValue) {
 }
 
 function handleError(error) {
-  // Supprimer la déclaration inutilisée
-  // const errorMessages = {
-  //   network: "Problème de connexion réseau",
-  //   api: "Erreur de l'API",
-  //   location: "Impossible de trouver la ville",
-  // };
-  // ... logique de gestion d'erreur
+  const errorMessages = {
+    network: "Problème de connexion réseau",
+    api: "Erreur de l'API",
+    location: "Impossible de trouver la ville",
+    default: "Une erreur est survenue",
+  };
+
+  loader.classList.remove("active");
+  userInformation.textContent = error.message || errorMessages.default;
+
+  // Réinitialiser l'interface
+  cityName.textContent = "---";
+  pollutionInfo.textContent = "---";
+  pollutionValue.textContent = "---";
+  emojiLogo.src = "ressources/error.svg"; // Ajouter une icône d'erreur
 }
+
+const searchBtn = document.querySelector("#searchBtn");
+const citySearch = document.querySelector("#citySearch");
+
+searchBtn.addEventListener("click", () => {
+  const city = citySearch.value.trim();
+  if (city) {
+    loader.classList.add("active");
+    getPollutionData(city);
+  }
+});
+
+// Ajout de la recherche avec la touche Entrée
+citySearch.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    const city = citySearch.value.trim();
+    if (city) {
+      loader.classList.add("active");
+      getPollutionData(city);
+    }
+  }
+});
