@@ -13,18 +13,33 @@
     />
   </head>
   <body>
-
     <div class="background-layer"></div>
 
     <div class="app-container">
       <h1>Application Air-Quality</h1>
+      <div class="search-container">
+        <input
+          type="text"
+          id="citySearch"
+          placeholder="Rechercher une ville..."
+        />
+        <button id="searchBtn">Rechercher</button>
+      </div>
     </div>
 
     <div class="information-block">
       <div class="loader active">
-        <img src="ressources/biodegradable.svg" alt="loader icon" class="loader-logo">
+        <img
+          src="ressources/biodegradable.svg"
+          alt="loader icon"
+          class="loader-logo"
+        />
       </div>
-      <img src="ressources/magnifying-glass.svg" alt="feeling icon" class="emoji-logo">
+      <img
+        src="ressources/magnifying-glass.svg"
+        alt="feeling icon"
+        class="emoji-logo"
+      />
       <p class="user-information">Information de votre ville</p>
       <table>
         <tr>
@@ -39,10 +54,22 @@
           <th class="label">Qualité de l'air</th>
           <td class="pollution-value">...</td>
         </tr>
+        <tr>
+          <th class="label">Température</th>
+          <td class="temperature">...</td>
+        </tr>
+        <tr>
+          <th class="label">Humidité</th>
+          <td class="humidity">...</td>
+        </tr>
       </table>
       <p class="scale-bar-text">Jauge de pollution :</p>
       <div class="scale-container">
-        <img src="ressources/location.svg" alt="location" class="location-pointer">
+        <img
+          src="ressources/location.svg"
+          alt="location"
+          class="location-pointer"
+        />
         <div class="scale-section"></div>
         <div class="scale-section"></div>
         <div class="scale-section"></div>
