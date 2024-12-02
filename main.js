@@ -61,7 +61,11 @@ async function getPollutionDataByCoords(lat, lon) {
     const pollutionData = await pollutionResponse.json();
     const weatherData = await weatherResponse.json();
 
-    console.log("Weather Data:", weatherData); // Pour déboguer
+    console.log("Weather Data:", {
+      temp: weatherData.main.temp,
+      humidity: weatherData.main.humidity,
+      name: weatherData.name,
+    });
 
     const aqi = pollutionData.list[0].main.aqi * 20;
 
