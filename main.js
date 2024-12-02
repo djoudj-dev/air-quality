@@ -42,31 +42,32 @@ const emojiLogo = document.querySelector(".emoji-logo");
 const userInformation = document.querySelector(".user-information");
 
 async function getPollutionDataByCoords(lat, lon) {
-  const apiKey = "354192e64a8c417fbb007fb1d71bfb2f";
-  const baseUrl = `https://api.weatherbit.io/v2.0/current/airquality?lat=${lat}&lon=${lon}&key=${apiKey}`;
+  const apiKey = "b218c5b0d5ac2e6368a544b578ad9125";
+  const baseUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
 
   try {
-    const response = await fetch(baseUrl);
+    const [pollutionResponse, weatherResponse] = await Promise.all([
+      fetch(baseUrl),
+      fetch(weatherUrl),
+    ]);
 
-    if (!response.ok) {
-      throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+    if (!pollutionResponse.ok || !weatherResponse.ok) {
+      throw new Error(
+        `Erreur ${pollutionResponse.status}: ${pollutionResponse.statusText}`
+      );
     }
 
-    const responseData = await response.json();
-    console.log(responseData);
+    const pollutionData = await pollutionResponse.json();
+    const weatherData = await weatherResponse.json();
 
-    if (!responseData.data) {
-      throw new Error("Données invalides reçues de l'API");
-    }
-
-    const data = responseData.data[0];
-    const aqi = data.aqi;
+    const aqi = pollutionData.list[0].main.aqi * 20; // Conversion de l'échelle 1-5 à 0-100
 
     const sortedData = {
-      city: responseData.city_name || "Localisation actuelle",
+      city: weatherData.name || "Localisation actuelle",
       aqius: aqi,
-      temperature: data.temp,
-      humidity: data.rh,
+      temperature: Math.round(weatherData.main.temp),
+      humidity: weatherData.main.humidity,
       ...pollutionScale.find(
         (object) => aqi >= object.scale[0] && aqi <= object.scale[1]
       ),
@@ -80,38 +81,26 @@ async function getPollutionDataByCoords(lat, lon) {
 }
 
 async function getPollutionData(city = null) {
-  const apiKey = "354192e64a8c417fbb007fb1d71bfb2f";
-  const baseUrl = `https://api.weatherbit.io/v2.0/current/airquality?city=${encodeURIComponent(
+  const apiKey = "b218c5b0d5ac2e6368a544b578ad9125";
+  const geocodeUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(
     city
-  )},FR&key=${apiKey}`;
+  )},FR&limit=1&appid=${apiKey}`;
 
   try {
-    const response = await fetch(baseUrl);
-
-    if (!response.ok) {
-      throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+    const geocodeResponse = await fetch(geocodeUrl);
+    if (!geocodeResponse.ok) {
+      throw new Error(
+        `Erreur ${geocodeResponse.status}: ${geocodeResponse.statusText}`
+      );
     }
 
-    const responseData = await response.json();
-
-    if (!responseData.data) {
-      throw new Error("Données invalides reçues de l'API");
+    const locationData = await geocodeResponse.json();
+    if (!locationData.length) {
+      throw new Error("Ville non trouvée");
     }
 
-    const data = responseData.data[0];
-    const aqi = data.aqi;
-
-    const sortedData = {
-      city: responseData.city_name,
-      aqius: aqi,
-      temperature: data.temp,
-      humidity: data.rh,
-      ...pollutionScale.find(
-        (object) => aqi >= object.scale[0] && aqi <= object.scale[1]
-      ),
-    };
-
-    populateUI(sortedData);
+    const { lat, lon } = locationData[0];
+    getPollutionDataByCoords(lat, lon);
   } catch (error) {
     console.error("Erreur détaillée:", error);
     handleError(error);
