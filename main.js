@@ -53,6 +53,7 @@ async function getPollutionDataByCoords(lat, lon) {
     }
 
     const responseData = await response.json();
+    console.log(responseData);
 
     if (!responseData.data) {
       throw new Error("Données invalides reçues de l'API");
@@ -122,6 +123,7 @@ function getLocationAndPollutionData() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+        console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
         getPollutionDataByCoords(latitude, longitude);
       },
       (error) => {
