@@ -80,7 +80,62 @@ async function getPollutionData(city = null) {
     handleError(error);
   }
 }
-getPollutionData();
+
+function getLocationAndPollutionData() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        getPollutionDataByCoords(latitude, longitude);
+      },
+      (error) => {
+        console.error("Erreur de géolocalisation:", error);
+        getPollutionData(); // Fallback to nearest city
+      }
+    );
+  } else {
+    console.error("La géolocalisation n'est pas supportée par ce navigateur.");
+    getPollutionData(); // Fallback to nearest city
+  }
+}
+
+async function getPollutionDataByCoords(lat, lon) {
+  const baseUrl = "https://api.airvisual.com/v2/";
+  const endpoint = `nearest_city?lat=${lat}&lon=${lon}&key=60df5a43-9827-4477-af7f-7de59da5d177`;
+
+  try {
+    const response = await fetch(baseUrl + endpoint);
+
+    if (!response.ok) {
+      throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+
+    if (!responseData.data) {
+      throw new Error("Données invalides reçues de l'API");
+    }
+
+    const aqius = responseData.data.current.pollution.aqius;
+
+    const sortedData = {
+      city: responseData.data.city,
+      aqius,
+      temperature: responseData.data.current.weather.tp,
+      humidity: responseData.data.current.weather.hu,
+      ...pollutionScale.find(
+        (object) => aqius >= object.scale[0] && aqius <= object.scale[1]
+      ),
+    };
+
+    populateUI(sortedData);
+  } catch (error) {
+    console.error("Erreur détaillée:", error);
+    handleError(error);
+  }
+}
+
+getLocationAndPollutionData();
 console.log("Le thread principal continue de s'exécuter...");
 
 const cityName = document.querySelector(".city-name");
