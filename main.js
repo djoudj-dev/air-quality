@@ -61,18 +61,21 @@ async function getPollutionDataByCoords(lat, lon) {
     const pollutionData = await pollutionResponse.json();
     const weatherData = await weatherResponse.json();
 
-    const aqi = pollutionData.list[0].main.aqi * 20; // Conversion de l'échelle 1-5 à 0-100
+    console.log("Weather Data:", weatherData); // Pour déboguer
+
+    const aqi = pollutionData.list[0].main.aqi * 20;
 
     const sortedData = {
       city: weatherData.name || "Localisation actuelle",
       aqius: aqi,
-      temperature: Math.round(weatherData.main.temp),
-      humidity: weatherData.main.humidity,
+      temperature: Math.round(weatherData.main.temp), // Température en Celsius
+      humidity: weatherData.main.humidity, // Humidité en %
       ...pollutionScale.find(
         (object) => aqi >= object.scale[0] && aqi <= object.scale[1]
       ),
     };
 
+    console.log("Sorted Data:", sortedData); // Pour déboguer
     populateUI(sortedData);
   } catch (error) {
     console.error("Erreur détaillée:", error);
