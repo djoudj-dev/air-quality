@@ -46,7 +46,7 @@ async function getPollutionData(city = null) {
   const endpoint = city
     ? `city?city=${encodeURIComponent(
         city
-      )}&country=FR&key=60df5a43-9827-4477-af7f-7de59da5d177`
+      )}&state=Ile-de-France&country=France&key=60df5a43-9827-4477-af7f-7de59da5d177`
     : `nearest_city?key=60df5a43-9827-4477-af7f-7de59da5d177`;
 
   try {
