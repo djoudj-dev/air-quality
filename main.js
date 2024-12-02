@@ -46,21 +46,17 @@ async function getPollutionData(city = null) {
   const endpoint = city
     ? `city?city=${encodeURIComponent(
         city
-      )}&country=FR&state=Ile-de-France&key=60df5a43-9827-4477-af7f-7de59da5d177`
+      )}&country=FR&key=60df5a43-9827-4477-af7f-7de59da5d177`
     : `nearest_city?key=60df5a43-9827-4477-af7f-7de59da5d177`;
 
   try {
     const response = await fetch(baseUrl + endpoint);
-
-    console.log("URL appelée:", baseUrl + endpoint);
-    console.log("Statut de la réponse:", response.status);
 
     if (!response.ok) {
       throw new Error(`Erreur ${response.status}: ${response.statusText}`);
     }
 
     const responseData = await response.json();
-    console.log("Données reçues:", responseData);
 
     if (!responseData.data) {
       throw new Error("Données invalides reçues de l'API");
@@ -78,7 +74,6 @@ async function getPollutionData(city = null) {
       ),
     };
 
-    console.log("Données triées:", sortedData);
     populateUI(sortedData);
   } catch (error) {
     console.error("Erreur détaillée:", error);
