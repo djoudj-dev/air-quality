@@ -41,16 +41,12 @@ const loader = document.querySelector(".loader");
 const emojiLogo = document.querySelector(".emoji-logo");
 const userInformation = document.querySelector(".user-information");
 
-async function getPollutionData(city = null) {
-  const baseUrl = "https://api.airvisual.com/v2/";
-  const endpoint = city
-    ? `city?city=${encodeURIComponent(
-        city
-      )}&state=Ile-de-France&country=France&key=60df5a43-9827-4477-af7f-7de59da5d177`
-    : `nearest_city?key=60df5a43-9827-4477-af7f-7de59da5d177`;
+async function getPollutionDataByCoords(lat, lon) {
+  const apiKey = "354192e64a8c417fbb007fb1d71bfb2f";
+  const baseUrl = `https://api.weatherbit.io/v2.0/current/airquality?lat=${lat}&lon=${lon}&key=${apiKey}`;
 
   try {
-    const response = await fetch(baseUrl + endpoint);
+    const response = await fetch(baseUrl);
 
     if (!response.ok) {
       throw new Error(`Erreur ${response.status}: ${response.statusText}`);
@@ -62,15 +58,55 @@ async function getPollutionData(city = null) {
       throw new Error("Données invalides reçues de l'API");
     }
 
-    const aqius = responseData.data.current.pollution.aqius;
+    const data = responseData.data[0];
+    const aqi = data.aqi;
 
     const sortedData = {
-      city: responseData.data.city,
-      aqius,
-      temperature: responseData.data.current.weather.tp,
-      humidity: responseData.data.current.weather.hu,
+      city: responseData.city_name || "Localisation actuelle",
+      aqius: aqi,
+      temperature: data.temp,
+      humidity: data.rh,
       ...pollutionScale.find(
-        (object) => aqius >= object.scale[0] && aqius <= object.scale[1]
+        (object) => aqi >= object.scale[0] && aqi <= object.scale[1]
+      ),
+    };
+
+    populateUI(sortedData);
+  } catch (error) {
+    console.error("Erreur détaillée:", error);
+    handleError(error);
+  }
+}
+
+async function getPollutionData(city = null) {
+  const apiKey = "354192e64a8c417fbb007fb1d71bfb2f";
+  const baseUrl = `https://api.weatherbit.io/v2.0/current/airquality?city=${encodeURIComponent(
+    city
+  )},FR&key=${apiKey}`;
+
+  try {
+    const response = await fetch(baseUrl);
+
+    if (!response.ok) {
+      throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+
+    if (!responseData.data) {
+      throw new Error("Données invalides reçues de l'API");
+    }
+
+    const data = responseData.data[0];
+    const aqi = data.aqi;
+
+    const sortedData = {
+      city: responseData.city_name,
+      aqius: aqi,
+      temperature: data.temp,
+      humidity: data.rh,
+      ...pollutionScale.find(
+        (object) => aqi >= object.scale[0] && aqi <= object.scale[1]
       ),
     };
 
@@ -90,51 +126,16 @@ function getLocationAndPollutionData() {
       },
       (error) => {
         console.error("Erreur de géolocalisation:", error);
-        getPollutionData(); // Fallback to nearest city
+        handleError(error);
       }
     );
   } else {
     console.error("La géolocalisation n'est pas supportée par ce navigateur.");
-    getPollutionData(); // Fallback to nearest city
+    handleError(new Error("Géolocalisation non supportée"));
   }
 }
 
-async function getPollutionDataByCoords(lat, lon) {
-  const baseUrl = "https://api.airvisual.com/v2/";
-  const endpoint = `nearest_city?lat=${lat}&lon=${lon}&key=60df5a43-9827-4477-af7f-7de59da5d177`;
-
-  try {
-    const response = await fetch(baseUrl + endpoint);
-
-    if (!response.ok) {
-      throw new Error(`Erreur ${response.status}: ${response.statusText}`);
-    }
-
-    const responseData = await response.json();
-
-    if (!responseData.data) {
-      throw new Error("Données invalides reçues de l'API");
-    }
-
-    const aqius = responseData.data.current.pollution.aqius;
-
-    const sortedData = {
-      city: responseData.data.city,
-      aqius,
-      temperature: responseData.data.current.weather.tp,
-      humidity: responseData.data.current.weather.hu,
-      ...pollutionScale.find(
-        (object) => aqius >= object.scale[0] && aqius <= object.scale[1]
-      ),
-    };
-
-    populateUI(sortedData);
-  } catch (error) {
-    console.error("Erreur détaillée:", error);
-    handleError(error);
-  }
-}
-
+// Démarrer l'application avec la géolocalisation
 getLocationAndPollutionData();
 console.log("Le thread principal continue de s'exécuter...");
 
